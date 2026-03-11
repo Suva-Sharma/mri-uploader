@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ServicePlan {
+  BASIC
+  ADVANCED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum CaseStatus {
+  CREATED
+  UPLOADING
+  VALIDATING
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum EmailType {
+  USER_RECEIVED
+  ADMIN_NEW_UPLOAD
+  USER_COMPLETED
+  USER_FAILED
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PENDING
+  PAID
+  FAILED
+}
+
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cases     Case[]
+}
+
+model NotificationRecipient {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Case {
+  id             String     @id @default(uuid())
+  userId         String?
+  user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  plan           ServicePlan @default(BASIC)
+  patientName    String
+  submitterEmail String
+  dob            DateTime
+  gender         Gender
+  status         CaseStatus @default(CREATED)
+
+  validatedAt    DateTime?
+  completedAt    DateTime?
+
+  paymentStatus           PaymentStatus @default(UNPAID)
+  amountCents             Int?
+  currency                String?
+  stripeCheckoutSessionId String?
+  stripePaymentIntentId   String?
+  paidAt                  DateTime?
+
+
+  files          CaseFile[]
+  emails         EmailLog[]
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([submitterEmail])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CaseFile {
+  id             String   @id @default(uuid())
+  caseId         String
+  case           Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  originalName   String
+  storedPath     String
+  mimeType       String?
+  sizeBytes      BigInt
+  checksumSha256 String?
+
+  uploadedAt     DateTime @default(now())
+  validatedAt    DateTime?
+
+  @@index([caseId])
+  @@index([uploadedAt])
+}
+
+model EmailLog {
+  id        String      @id @default(uuid())
+  caseId    String
+  case      Case        @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  to        String
+  type      EmailType
+  status    EmailStatus @default(SENT)
+  error     String?
+
+  createdAt DateTime    @default(now())
+
+  @@index([caseId])
+  @@index([createdAt])
+}
+

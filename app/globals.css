@@ -24,3 +24,85 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* =========================
+   Upload form theme
+   ========================= */
+   .upload-form-theme {
+    --brand-dark: #004483;
+    --brand: #007AEB;
+    --brand-soft: #77BEF2;
+    --surface: #FDFDFD;
+    --line: #E0E0E0;
+  }
+  
+  /* Labels */
+  .upload-form-theme label {
+    color: var(--brand-dark) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+  }
+  
+  /* Inputs/select/textarea */
+  .upload-form-theme :is(input, select, textarea) {
+    width: 100%;
+    border: 1px solid var(--line) !important;
+    background: #ffffff !important;
+    color: #0f2f57 !important;
+    border-radius: 12px !important;
+    padding: 0.7rem 0.85rem !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .upload-form-theme :is(input, select, textarea)::placeholder {
+    color: #7b93b2;
+  }
+  
+  .upload-form-theme :is(input, select, textarea):focus {
+    outline: none !important;
+    border-color: var(--brand-soft) !important;
+    box-shadow: 0 0 0 3px rgba(119, 190, 242, 0.28) !important;
+    background: #fff !important;
+  }
+  
+  /* File input */
+  .upload-form-theme input[type="file"] {
+    padding: 0.55rem 0.7rem !important;
+    cursor: pointer;
+    border-style: dashed !important;
+    border-color: #bcd8f2 !important;
+    background: #f9fcff !important;
+  }
+  
+  /* Buttons (keep primary button consistent dark blue) */
+  .upload-form-theme button {
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    transition: transform 0.15s ease, filter 0.2s ease;
+  }
+  
+  .upload-form-theme button:hover {
+    filter: brightness(1.05);
+  }
+  
+  .upload-form-theme button:active {
+    transform: translateY(1px);
+  }
+  
+  /* Make primary submit buttons use brand color if not explicitly styled */
+  .upload-form-theme button[type="submit"],
+  .upload-form-theme .primary,
+  .upload-form-theme [data-variant="primary"] {
+    background: #007AEB !important;
+    color: white !important;
+    border: 1px solid #007AEB !important;
+    box-shadow: 0 8px 20px rgba(0, 122, 235, 0.28) !important;
+  }
+  
+  /* Secondary buttons */
+  .upload-form-theme .secondary,
+  .upload-form-theme [data-variant="secondary"] {
+    background: #fff !important;
+    color: #004483 !important;
+    border: 1px solid #d7e5f5 !important;
+  }
+  
