@@ -9,8 +9,12 @@ import path from "node:path";
 import { sha256FileStreaming } from "@/lib/fileHash";
 import { notifyCaseReceived } from "@/lib/notify";
 
+const DATA_ROOT = process.env.DATA_ROOT ?? path.join(process.cwd(), "data");
+
 function resolveStoredPath(storedPath: string) {
-  return path.isAbsolute(storedPath) ? storedPath : path.join(process.cwd(), storedPath);
+  return path.isAbsolute(storedPath)
+    ? storedPath
+    : path.join(DATA_ROOT, storedPath);
 }
 
 export async function POST(req: Request) {
@@ -25,10 +29,14 @@ export async function POST(req: Request) {
     });
 
     if (!found) return NextResponse.json({ error: "Case not found" }, { status: 404 });
-    if (!found.files?.length) return NextResponse.json({ error: "No files found for this case" }, { status: 400 });
+    if (!found.files?.length) {
+      return NextResponse.json({ error: "No files found for this case" }, { status: 400 });
+    }
 
-    // Set VALIDATING
-    await prisma.case.update({ where: { id: caseId }, data: { status: "VALIDATING" } });
+    await prisma.case.update({
+      where: { id: caseId },
+      data: { status: "VALIDATING" },
+    });
 
     for (const f of found.files) {
       const abs = resolveStoredPath(f.storedPath);
@@ -37,21 +45,28 @@ export async function POST(req: Request) {
       try {
         stat = await fsp.stat(abs);
       } catch {
-        await prisma.case.update({ where: { id: caseId }, data: { status: "FAILED" } });
+        await prisma.case.update({
+          where: { id: caseId },
+          data: { status: "FAILED" },
+        });
         return NextResponse.json({ error: "File missing on server" }, { status: 400 });
       }
 
       if (!stat.isFile() || stat.size <= 0) {
-        await prisma.case.update({ where: { id: caseId }, data: { status: "FAILED" } });
+        await prisma.case.update({
+          where: { id: caseId },
+          data: { status: "FAILED" },
+        });
         return NextResponse.json({ error: "Uploaded file is empty" }, { status: 400 });
       }
 
-      // Recompute checksum via streaming (no RAM spike)
       const checksumNow = await sha256FileStreaming(abs);
 
-      // If we stored checksum during upload, compare.
       if (f.checksumSha256 && f.checksumSha256 !== checksumNow) {
-        await prisma.case.update({ where: { id: caseId }, data: { status: "FAILED" } });
+        await prisma.case.update({
+          where: { id: caseId },
+          data: { status: "FAILED" },
+        });
         return NextResponse.json({ error: "Checksum mismatch (file corrupted)" }, { status: 400 });
       }
 
@@ -65,13 +80,11 @@ export async function POST(req: Request) {
       });
     }
 
-    // Mark QUEUED + validatedAt
     await prisma.case.update({
       where: { id: caseId },
       data: { status: "QUEUED", validatedAt: new Date() },
     });
 
-    // Notifications (do not block queueing if email fails)
     try {
       await notifyCaseReceived(caseId);
     } catch (e) {
