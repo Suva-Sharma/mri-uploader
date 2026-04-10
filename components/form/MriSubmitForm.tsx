@@ -44,7 +44,6 @@ export default function MriSubmitForm({ plan }: { plan?: Plan }) {
 
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -55,7 +54,6 @@ export default function MriSubmitForm({ plan }: { plan?: Plan }) {
   }, [busy, patientName, email, dob, gender, file]);
 
   const router = useRouter();
-  const [verifiedCaseId, setVerifiedCaseId] = useState<string | null>(null);
 
   function validateClient() {
     const e: Record<string, string> = {};
@@ -69,15 +67,13 @@ export default function MriSubmitForm({ plan }: { plan?: Plan }) {
   }
 
   async function submit() {
-    setSuccess(false);
     setStep(null);
     setUploadPct(0);
-    setVerifiedCaseId(null);
+    setErrors({});
 
     if (!validateClient() || !file) return;
 
     setBusy(true);
-    setErrors({});
 
     try {
       setStep("Uploading…");
@@ -88,11 +84,11 @@ export default function MriSubmitForm({ plan }: { plan?: Plan }) {
       fd.append("dob", dob);
       fd.append("gender", gender);
       fd.append("file", file);
-      // optional: pass plan to backend later
       fd.append("plan", plan ?? "basic");
 
       const uploadJson = await uploadWithProgress("/api/cases/upload", fd, setUploadPct);
       if (!uploadJson.ok) throw new Error(uploadJson?.error ?? "Upload failed");
+
       const caseId = uploadJson.caseId;
       if (!caseId) throw new Error("Upload did not return a caseId");
 
@@ -108,13 +104,11 @@ export default function MriSubmitForm({ plan }: { plan?: Plan }) {
       const finJson = (await finRes.json()) as FinalizeResp;
       if (!finRes.ok) throw new Error(finJson?.error ?? "Finalize failed");
 
-      setVerifiedCaseId(caseId);
-      setStep("Received ✅");
-      setSuccess(true);
+      setStep("Redirecting to payment…");
+      router.push(`/pay?caseId=${caseId}`);
     } catch (err: any) {
       setErrors((prev) => ({ ...prev, submit: err?.message ?? "Something went wrong" }));
       setStep(null);
-    } finally {
       setBusy(false);
     }
   }
@@ -131,36 +125,6 @@ export default function MriSubmitForm({ plan }: { plan?: Plan }) {
           Plan: {(plan ?? "basic").toUpperCase()}
         </div>
       </div>
-
-      {success ? (
-        <div className="rounded-2xl border border-[#BFE2FF] bg-[#F2F9FF] p-4 space-y-4 shadow-[0_8px_24px_rgba(0,122,235,0.12)]">
-          <div>
-            <div className="font-semibold text-[#004483]">Submission received ✅</div>
-            <div className="mt-1 text-sm text-[#2F5E93]">
-              Your upload has been verified. You can proceed to payment next.
-            </div>
-          </div>
-
-          {/* Payment is only available after verifiedCaseId is set */}
-          <button
-            type="button"
-            disabled={!verifiedCaseId}
-            onClick={() => router.push(`/pay?caseId=${verifiedCaseId}`)}
-            className={[
-              "w-full rounded-xl px-5 py-3 text-sm font-semibold transition",
-              verifiedCaseId
-                ? "bg-[#004483] text-white hover:bg-[#005AAE] shadow-[0_8px_20px_rgba(0,68,131,0.25)]"
-                : "cursor-not-allowed bg-[#E0E0E0] text-[#7C8CA1]",
-            ].join(" ")}
-          >
-            Proceed to payment →
-          </button>
-
-          <div className="text-center text-xs text-[#4E6E95]">
-            Payment is enabled only after a complete verified upload.
-          </div>
-        </div>
-      ) : null}
 
       {/* fields */}
       <div className="grid gap-4 md:grid-cols-2">
