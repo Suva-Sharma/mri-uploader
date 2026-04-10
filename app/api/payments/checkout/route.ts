@@ -59,7 +59,7 @@ export async function POST(req: Request) {
             currency,
             unit_amount: amountCents,
             product_data: {
-              name: c.plan === "ADVANCED" ? "MRI Report - Advanced" : "MRI Report - Basic",
+              name: c.plan === "ADVANCED" ? "Brain Health Report - Advanced" : "Brain Health Report - Basic",
             },
           },
         },

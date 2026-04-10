@@ -3,25 +3,19 @@ export const runtime = "nodejs";
 
 import Link from "next/link";
 import Image from "next/image";
-import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { priceForPlan } from "@/lib/pricing";
 
 type SearchParams = {
   caseId?: string | string[];
-  session_id?: string | string[];
 };
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-export default async function SuccessPage({
+export default async function PayLaterSuccessPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
   const caseId = Array.isArray(sp.caseId) ? sp.caseId[0] : sp.caseId;
-  const sessionId = Array.isArray(sp.session_id) ? sp.session_id[0] : sp.session_id;
 
   if (!caseId) {
     return (
@@ -30,15 +24,15 @@ export default async function SuccessPage({
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:py-6">
             <div className="flex items-center gap-3">
               <Image
-                src="/logo/app-logo.png"
-                alt=" Brain Health Report logo"
-                width={40}
-                height={40}
+                src="/logo/applogo.png"
+                alt="Brain Health Report logo"
+                width={45}
+                height={45}
                 className="object-contain"
               />
               <div className="leading-tight">
                 <div className="text-[30px] font-semibold tracking-tight text-[#004483]">
-                Brain Health Report
+                  Brain Health Report
                 </div>
                 <div className="text-xs text-slate-500">Secure upload • Email delivery</div>
               </div>
@@ -58,13 +52,13 @@ export default async function SuccessPage({
     );
   }
 
-  let c = await prisma.case.findUnique({
+  const c = await prisma.case.findUnique({
     where: { id: caseId },
     select: {
       id: true,
-      plan: true,
-      paymentStatus: true,
       patientName: true,
+      paymentStatus: true,
+      status: true,
     },
   });
 
@@ -75,15 +69,15 @@ export default async function SuccessPage({
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:py-6">
             <div className="flex items-center gap-3">
               <Image
-                src="/logo/app-logo.png"
+                src="/logo/applogo.png"
                 alt="Brain Health Report logo"
-                width={40}
-                height={40}
+                width={45}
+                height={45}
                 className="object-contain"
               />
               <div className="leading-tight">
                 <div className="text-[30px] font-semibold tracking-tight text-[#004483]">
-                Brain Health Report
+                  Brain Health Report
                 </div>
                 <div className="text-xs text-slate-500">Secure upload • Email delivery</div>
               </div>
@@ -103,48 +97,7 @@ export default async function SuccessPage({
     );
   }
 
-  if (c.paymentStatus !== "PAID" && sessionId) {
-    try {
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-      const paid =
-        session.payment_status === "paid" ||
-        session.status === "complete";
-
-      if (paid) {
-        const expected = priceForPlan(c.plan as "BASIC" | "ADVANCED");
-        const paidAmount = session.amount_total ?? 0;
-        const paidCurrency = (session.currency ?? "").toLowerCase();
-
-        if (paidAmount === expected.amountCents && paidCurrency === expected.currency) {
-          await prisma.case.update({
-            where: { id: c.id },
-            data: {
-              paymentStatus: "PAID",
-              paidAt: new Date(),
-              stripeCheckoutSessionId: session.id,
-              stripePaymentIntentId: session.payment_intent ? String(session.payment_intent) : null,
-            },
-          });
-
-          c = await prisma.case.findUnique({
-            where: { id: caseId },
-            select: {
-              id: true,
-              plan: true,
-              paymentStatus: true,
-              patientName: true,
-            },
-          });
-        }
-      }
-    } catch (e) {
-      console.error("SUCCESS_PAGE_FALLBACK_CONFIRM_FAIL", e);
-    }
-  }
-
-  const isPaid = c?.paymentStatus === "PAID";
-  const customerName = c?.patientName?.trim() || "Customer";
+  const customerName = c.patientName?.trim() || "Customer";
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-slate-900">
@@ -154,13 +107,13 @@ export default async function SuccessPage({
             <Image
               src="/logo/applogo.png"
               alt="Brain Health Report logo"
-              width={40}
-              height={40}
+              width={45}
+              height={45}
               className="object-contain"
             />
             <div className="leading-tight">
               <div className="text-[30px] font-semibold tracking-tight text-[#004483]">
-              Brain Health Report
+                Brain Health Report
               </div>
               <div className="text-xs text-slate-500">Secure upload • Email delivery</div>
             </div>
@@ -178,68 +131,44 @@ export default async function SuccessPage({
       <main className="min-h-[calc(100vh-88px)] bg-gradient-to-r from-[#004483] via-[#0069CC] to-[#007AEB] px-4 py-12">
         <div className="mx-auto max-w-2xl">
           <div className="rounded-3xl bg-white p-8 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
-            {isPaid ? (
-              <>
-                <div className="mb-6">
-                  <div className="inline-flex items-center rounded-full bg-[#EAF4FF] px-3 py-1 text-xs font-semibold text-[#004483]">
-                    Payment received
-                  </div>
-                  <h1 className="mt-4 text-3xl font-semibold text-[#004483]">
-                    Thank you
-                  </h1>
-                </div>
+            <div className="mb-6">
+              <div className="inline-flex items-center rounded-full bg-[#EAF4FF] px-3 py-1 text-xs font-semibold text-[#004483]">
+                Payment pending
+              </div>
+              <h1 className="mt-4 text-3xl font-semibold text-[#004483]">
+                Thank you
+              </h1>
+            </div>
 
-                <div className="space-y-4 text-sm leading-7 text-[#2F5E93]">
-                  <p>
-                    Dear <span className="font-semibold text-[#004483]">{customerName}</span>,
-                  </p>
+            <div className="space-y-4 text-sm leading-7 text-[#2F5E93]">
+              <p>
+                Dear <span className="font-semibold text-[#004483]">{customerName}</span>,
+              </p>
 
-                  <p>
-                    Thank you for uploading your data and completing the payment.
-                  </p>
+              <p>
+                Thank you for uploading your data to BrainCast.
+              </p>
 
-                  <p>
-                    We would like to inform you that your report is currently being processed
-                    and will be sent to you within the next two weeks.
-                  </p>
+              <p>
+                To proceed with generating your report, payment is required. An invoice will be
+                sent to you shortly with the details needed to complete the payment.
+              </p>
 
-                  <p>
-                    If you have any questions in the meantime, please feel free to reach out.
-                  </p>
+              <p>
+                Once payment has been received, we will begin processing your report and keep you
+                updated on the timeline.
+              </p>
 
-                  <div className="pt-2">
-                    <p>Kind regards,</p>
-                    <p className="font-semibold text-[#004483]">The BrainCast Team</p>
-                    <p>Melbourne, Australia</p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mb-6">
-                  <div className="inline-flex items-center rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-[#8A6A00]">
-                    Payment pending
-                  </div>
-                  <h1 className="mt-4 text-3xl font-semibold text-[#004483]">
-                    Payment not confirmed yet
-                  </h1>
-                </div>
+              <p>
+                If you have any questions, please feel free to get in touch.
+              </p>
 
-                <p className="text-sm leading-7 text-[#2F5E93]">
-                  We couldn’t confirm your payment yet. If you completed checkout, please wait a
-                  moment and try again.
-                </p>
-
-                <div className="mt-8">
-                  <Link
-                    href={`/pay?caseId=${caseId}`}
-                    className="inline-flex rounded-xl bg-[#004483] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005AAE]"
-                  >
-                    Return to payment
-                  </Link>
-                </div>
-              </>
-            )}
+              <div className="pt-2">
+                <p>Kind regards,</p>
+                <p className="font-semibold text-[#004483]">The BrainCast Team</p>
+                <p>Melbourne, Australia</p>
+              </div>
+            </div>
 
             <div className="mt-8 rounded-2xl border border-[#E0E0E0] bg-[#F5FAFF] px-4 py-3">
               <div className="text-xs font-medium uppercase tracking-wide text-[#6E8FB4]">
@@ -248,6 +177,15 @@ export default async function SuccessPage({
               <div className="mt-1 break-all font-mono text-sm font-semibold text-[#004483]">
                 {caseId}
               </div>
+            </div>
+
+            <div className="mt-8">
+              <Link
+                href="/"
+                className="inline-flex rounded-xl bg-[#004483] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005AAE]"
+              >
+                Back to home
+              </Link>
             </div>
           </div>
         </div>

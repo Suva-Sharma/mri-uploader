@@ -4,6 +4,8 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import PayButton from "@/components/pay/PayButton";
+import PayLaterButton from "@/components/pay/PayLaterButton";
+import Image from "next/image";
 
 type SearchParams = { caseId?: string | string[] };
 
@@ -21,12 +23,16 @@ export default async function PayPage({
         <header className="sticky top-0 z-30 border-b border-[#E0E0E0] bg-white">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:py-6">
             <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#004483] text-lg text-white">
-                🖥️
-              </div>
+                          <Image
+                src="/logo/applogo.png"
+                alt="Brain Health Report logo"
+                width={45}
+                height={45}
+                className="object-contain"
+              />
               <div className="leading-tight">
                 <div className="text-[30px] font-semibold tracking-tight text-[#004483]">
-                  MRI Report
+                  Brain Health Report
                 </div>
                 <div className="text-xs text-slate-500">Secure upload • Email delivery</div>
               </div>
@@ -73,12 +79,16 @@ export default async function PayPage({
         <header className="sticky top-0 z-30 border-b border-[#E0E0E0] bg-white">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:py-6">
             <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#004483] text-lg text-white">
-                🖥️
-              </div>
+            <Image
+                src="/logo/applogo.png"
+                alt="Brain Health Report logo"
+                width={45}
+                height={45}
+                className="object-contain"
+              />
               <div className="leading-tight">
                 <div className="text-[30px] font-semibold tracking-tight text-[#004483]">
-                  MRI Report
+                  Brain Health Report
                 </div>
                 <div className="text-xs text-slate-500">Secure upload • Email delivery</div>
               </div>
@@ -112,12 +122,16 @@ export default async function PayPage({
       <header className="sticky top-0 z-30 border-b border-[#E0E0E0] bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:py-6">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#004483] text-lg text-white">
-              🖥️
-            </div>
+          <Image
+                src="/logo/applogo.png"
+                alt="Brain Health Report logo"
+                width={45}
+                height={45}
+                className="object-contain"
+              />
             <div className="leading-tight">
               <div className="text-[30px] font-semibold tracking-tight text-[#004483]">
-                MRI Report
+                Brain Health Report
               </div>
               <div className="text-xs text-slate-500">Secure upload • Email delivery</div>
             </div>
@@ -157,15 +171,9 @@ export default async function PayPage({
                 <div className="w-full">
                   <PayButton caseId={caseId} />
                 </div>
-                <div className="mt-3">
-                <button
-                  type="button"
-                  className="w-full rounded-xl border border-[#BFD8F2] bg-white px-5 py-3 text-sm font-semibold text-[#004483] transition hover:bg-[#F5FAFF]"
-                >
-                  Pay Later
-                </button>
-                
-              </div>
+                  <div className="mt-3">
+                  <PayLaterButton caseId={caseId} />
+                </div>
               </div>
             ) : (
               <div className="mt-8 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-[#8A6A00]">
