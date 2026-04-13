@@ -198,8 +198,24 @@ export default function MriSubmitForm({ plan }: { plan?: Plan }) {
         {busy ? "Submitting…" : "Submit & continue →"}
       </button>
 
-      <div className="text-center text-xs text-[#E0E0E0]">
-        We verify the upload before moving to payment.
+      <div className="space-y-2 text-center">
+        <div className="text-s text-[#E0E0E0]">
+          We verify the upload before moving to payment.
+        </div>
+
+        <div className="mx-auto max-w-2xl text-s leading-relaxed text-[#E0E0E0]">
+          Disclaimer: This service is provided for informational purposes only and is not a
+          substitute for professional medical advice, diagnosis, or treatment.{" "}
+          <a
+            href="/documents/disclaimer.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-white underline underline-offset-4 hover:text-[#77BEF2]"
+          >
+            Click here
+          </a>{" "}
+          to read the full disclaimer.
+        </div>
       </div>
     </div>
   );
