@@ -199,22 +199,24 @@ export default function MriSubmitForm({ plan }: { plan?: Plan }) {
       </button>
 
       <div className="space-y-2 text-center">
-        <div className="text-s text-[#E0E0E0]">
+        <div className="text-xs text-[#E0E0E0]">
           We verify the upload before moving to payment.
         </div>
 
-        <div className="mx-auto max-w-2xl text-s leading-relaxed text-[#E0E0E0]">
-          Disclaimer: This service is provided for informational purposes only and is not a
-          substitute for professional medical advice, diagnosis, or treatment.{" "}
+        <div className="mx-auto max-w-2xl text-xs leading-relaxed text-[#D7E6F7]">
+          Research Use Only: This platform provides experimental, non-diagnostic brain health
+          reports. It is not intended for clinical use or medical decision-making.
+          <br className="hidden md:block" />
+          By uploading data, you confirm you have the necessary consent and agree to our{" "}
           <a
             href="/documents/disclaimer.pdf"
             target="_blank"
             rel="noopener noreferrer"
             className="font-semibold text-white underline underline-offset-4 hover:text-[#77BEF2]"
           >
-            Click here
-          </a>{" "}
-          to read the full disclaimer.
+            Terms & Privacy Policy
+          </a>
+          . Reports are released only after payment, and unpaid data may be deleted.
         </div>
       </div>
     </div>
@@ -296,7 +298,9 @@ function Dropzone({
 
       {!file ? (
         <div className="text-center">
-          <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-xl bg-[#EAF4FF] text-[#004483]">⬆️</div>
+          <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-xl bg-[#EAF4FF] text-[#004483]">
+            ⬆️
+          </div>
           <div className="text-sm font-semibold text-[#004483]">Drag & drop your MRI file here</div>
           <div className="mt-1 text-xs text-[#4E6E95]">or click to browse</div>
           {error ? <div className="mt-3 text-xs text-red-600">{error}</div> : null}

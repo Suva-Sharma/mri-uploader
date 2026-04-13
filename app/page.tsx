@@ -105,9 +105,15 @@ export default async function LandingPage() {
           </div>
 
           <nav className="hidden items-center gap-8 text-sm font-medium text-[#004483] md:flex">
-            <a href="#pricing" className="hover:text-[#007AEB]">Pricing</a>
-            <a href="#how" className="hover:text-[#007AEB]">How It Works</a>
-            <a href="#security" className="hover:text-[#007AEB]">Privacy & Security</a>
+            <a href="#pricing" className="hover:text-[#007AEB]">
+              Pricing
+            </a>
+            <a href="#how" className="hover:text-[#007AEB]">
+              How It Works
+            </a>
+            <a href="#security" className="hover:text-[#007AEB]">
+              Privacy & Security
+            </a>
           </nav>
 
           <a
@@ -283,17 +289,19 @@ export default async function LandingPage() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-3xl text-center text-sm leading-relaxed text-[#204F87] md:text-base">
-            Disclaimer: This service is provided for informational purposes only and is not a
-            substitute for professional medical advice, diagnosis, or treatment.{" "}
+            Research Use Only: This platform provides experimental, non-diagnostic brain health
+            reports. It is not intended for clinical use or medical decision-making.
+            <br className="hidden md:block" />
+            By uploading data, you confirm you have the necessary consent and agree to our{" "}
             <a
               href="/documents/disclaimer.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold text-[#007AEB] underline underline-offset-4 hover:text-[#004483]"
             >
-              Click here
-            </a>{" "}
-            to read the full disclaimer.
+              Terms & Privacy Policy
+            </a>
+            . Reports are released only after payment, and unpaid data may be deleted.
           </p>
 
           <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -322,9 +330,15 @@ export default async function LandingPage() {
           <div className="flex flex-col gap-4 text-sm text-[#2F5E93] md:flex-row md:items-center md:justify-between">
             <div>© {new Date().getFullYear()} Brain Health Report. All rights reserved.</div>
             <div className="flex flex-wrap items-center gap-4">
-              <a href="#pricing" className="hover:text-[#007AEB]">Pricing</a>
-              <a href="#how" className="hover:text-[#007AEB]">How It Works</a>
-              <a href="#security" className="hover:text-[#007AEB]">Privacy & Security</a>
+              <a href="#pricing" className="hover:text-[#007AEB]">
+                Pricing
+              </a>
+              <a href="#how" className="hover:text-[#007AEB]">
+                How It Works
+              </a>
+              <a href="#security" className="hover:text-[#007AEB]">
+                Privacy & Security
+              </a>
             </div>
           </div>
         </div>
